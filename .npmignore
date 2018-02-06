@@ -1,0 +1,8 @@
+build
+dist
+node_modules
+test
+.babelrc
+.npmignore
+.npmrc
+package-lock.json
