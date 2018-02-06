@@ -5,4 +5,5 @@ test
 .babelrc
 .npmignore
 .npmrc
+.idea
 package-lock.json
