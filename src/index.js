@@ -1,4 +1,4 @@
-export const request = function (method, url, {query, body, headers}, responseType = 'text') {
+export const request = function (method, url, { query, body, headers }, responseType = 'text') {
     method = method.toUpperCase();
     if (query) {
         query = Object.keys(query).map(key => `${key}=${query[key]}`).join('&');
@@ -10,9 +10,9 @@ export const request = function (method, url, {query, body, headers}, responseTy
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    resolve({result: xhr.response, request: xhr});
+                    resolve({ result: xhr.response, request: xhr });
                 } else {
-                    reject({result: xhr.response, request: xhr});
+                    reject({ result: xhr.response, request: xhr });
                 }
             }
         };
@@ -28,13 +28,37 @@ export const request = function (method, url, {query, body, headers}, responseTy
 };
 
 export const get = function (url, query) {
-    return request('GET', url, {query});
+    return request('GET', url, { query });
 };
 
 export const load = function (url, query) {
-    return request('GET', url, {query}, 'arraybuffer');
+    return request('GET', url, { query }, 'arraybuffer');
 };
 
 export const post = function (url, query, body) {
-    return request('POST', url, {query, body});
+    return request('POST', url, { query, body });
 };
+
+
+let seed = 0;
+export const jsonp = function (url, query) {
+    let jsonp = 'callback' + seed++;
+    query.callback = jsonp;
+    let args = Object.keys(query).map(k => `${k}=${query[k]}`).join('&');
+    if (url.indexOf('?') === -1) {
+        url += '?' + args;
+    } else {
+        url += '&' + args;
+    }
+
+    return new Promise(resolve => {
+        let request = document.createElement('script');
+        request.src = url;
+        window[jsonp] = function (data) {
+            delete window[jsonp];
+            document.getElementsByTagName('head')[0].removeChild(request);
+            resolve(data);
+        }
+        document.getElementsByTagName('head')[0].appendChild(request);
+    })
+}
